@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     if (err) return res.status(500).json({ error: "Gagal parse file" });
 
     // --- ALAMAT RUMAH TERMUX KAMU ---
-    const NGROK_URL = "https://attempted-reservation-reporters-sporting.trycloudfla"; 
+    const NGROK_URL = "https://attempted-reservation-reporters-sporting.trycloudflare.com"; 
 
     try {
       const file = files.file[0] || files.file;
