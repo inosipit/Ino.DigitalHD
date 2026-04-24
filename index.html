@@ -55,9 +55,10 @@
         </div>
     </footer>
 
-    <script>
-        // --- GANTI LINK INI SETIAP RESTART NGROK ---
-        const NGROK_URL = "https://assembled-residential-locate-effectiveness.trycloudflare.com";
+     <script>
+        // --- GANTI LINK INI SETIAP RESTART CLOUDFLARE ---
+        // Pastikan pakai link .trycloudflare.com kamu yang terbaru
+        const NGROK_URL = "https://assembled-residential-locate-effectiveness.trycloudflare.com"; 
         let isWaiting = false;
 
         async function uploadFoto() {
@@ -65,7 +66,7 @@
 
             const fileInput = document.getElementById('fileInput');
             const btnUpload = document.getElementById('btnUpload');
-            if (fileInput.files.length === 0) return alert("Pilih foto dulu!");
+            if (fileInput.files.length === 0) return alert("Pilih foto dulu, Bos!");
 
             isWaiting = true;
             btnUpload.disabled = true;
@@ -75,32 +76,25 @@
             let width = 0;
             let bar = setInterval(() => {
                 if (width >= 95) clearInterval(bar);
-                else { width++; document.getElementById('progress-fill').style.width = width + '%'; document.getElementById('progress-text').innerText = width + '%'; }
-            }, 200);
+                else { 
+                    width++; 
+                    document.getElementById('progress-fill').style.width = width + '%'; 
+                    document.getElementById('progress-text').innerText = width + '%'; 
+                }
+            }, 300); // 300ms biar pas sama 30 detik
 
             const formData = new FormData();
             formData.append('file', fileInput.files[0]);
 
             try {
-                const res = await fetch('/api/upload', { method: 'POST', body: formData });
-                const data = await res.json();
+                // KIRIM KE TERMUX (Tambahkan Header Bypass)
+                const res = await fetch(NGROK_URL + '/api/remote-upload', { 
+                    method: 'POST', 
+                    body: formData,
+                    headers: { "bypass-tunnel-reminder": "true" } // <--- WAJIB ADA
+                });
                 
-                if (data.status === "Success") {
-                    // Polling Result
-                    const check = setInterval(async () => {
-                        const status = await fetch(`${NGROK_URL}/static/${fileInput.files[0].name}`);
-                        if (status.ok) {
-                            clearInterval(check);
-                            clearInterval(bar);
-                            document.getElementById('progress-fill').style.width = '100%';
-                            document.getElementById('progress-text').innerText = '100%';
-                            document.getElementById('hasil-foto').src = `${NGROK_URL}/static/${fileInput.files[0].name}`;
-                            document.getElementById('hasil-foto').style.display = "block";
-                            document.getElementById('btn-download').href = `${NGROK_URL}/static/${fileInput.files[0].name}`;
-                            document.getElementById('btn-download').style.display = "block";
-                        }
-                    }, 3000);
-
+                if (res.ok) {
                     // Timer Mundur 30 Detik
                     let timeLeft = 30;
                     let timer = setInterval(() => {
@@ -108,19 +102,28 @@
                         timeLeft--;
                         if (timeLeft < 0) {
                             clearInterval(timer);
+                            clearInterval(bar);
+                            document.getElementById('progress-fill').style.width = '100%';
+                            document.getElementById('progress-text').innerText = '100%';
                             isWaiting = false;
                             btnUpload.disabled = false;
                             btnUpload.innerText = "MULAI PROSES HD";
+                            
+                            // Tampilkan Info Download
+                            alert("✅ Selesai! Foto dikirim ke Bot HD.");
                         }
                     }, 1000);
                 }
             } catch (e) { 
-                alert("Termux Offline!"); 
-                isWaiting = false; btnUpload.disabled = false; btnUpload.innerText = "MULAI PROSES HD";
+                alert("Termux Offline! Cek Cloudflare kamu."); 
+                isWaiting = false; 
+                btnUpload.disabled = false; 
+                btnUpload.innerText = "MULAI PROSES HD";
                 clearInterval(bar);
             }
         }
     </script>
+
 </body>
   </html>
   
